@@ -32,18 +32,6 @@ echo -ne 'Done scanning  \n'
 kill -9 $PID 2> /dev/null && wait $PID 2> /dev/null
 }
 
-function getips () {
-while read -r i
-do
-if [ "$firstip" != "$i" ]
-then
-ping -c 2 $i > /dev/null
-mac=`arp -a | grep $i | awk '{print $4}'`
-echo -e "$(tput setaf 1)\t[!] $i\t==>\t$mac$(tput sgr 0)\n"
-firstip=$i
-fi
-done <<< "$ips"
-}
 header
 [ $# -ne 1 ] && echo -e "USAGE: `basename $0` [Interface Name]\n" && exit 1
 [ `whoami` != "root" ] && echo -e "$(tput setaf 1)! Run script again as root: sudo bash `basename $0` [Interface Name]$(tput sgr 0)\n" && exit 1
@@ -55,11 +43,20 @@ echo -en "Enter scan timout (default 30s): "
 read scantime
 [ -z $scantime ] && scantime=30
 scan
-ips=`sudo tshark -r /tmp/scanOutput.pcap -i $1 2>/dev/null| grep ARP | grep $broadcast | awk '{print $12}'`
+ips=`sudo tshark -r /tmp/scanOutput.pcap  2>/dev/null| grep ARP | grep $broadcast | awk '{print $12}'`
 if [[ $ips == *"."* ]] 
 then
 echo -e "Suspected Device:\n"
-getips
+for i in ${ips}
+do
+if [ "$firstip" != "$i" ]
+then
+ping -c 2 "$i" > /dev/null
+mac=`arp -a | grep "$i" | awk '{print $4}'`
+echo -e "$(tput setaf 1)\t[!] $i\t==>\t$mac$(tput sgr 0)\n"
+firstip=$i
+fi
+done
 exit 0
 else
 echo -en "No device detected\nTry again ? (y/n): "
