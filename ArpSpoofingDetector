@@ -20,7 +20,7 @@ fi
 }
 
 function scan () {
-    sudo tshark -w /tmp/scanOutput.pcap > /dev/null 2>&1 &
+    sudo tshark -w /tmp/scanOutput.pcap -i $1 > /dev/null 2>&1 &
     PID=$!
     for (( i=1; i<=$scantime; i++ ))
 do
@@ -55,7 +55,7 @@ echo -en "Enter scan timout (default 30s): "
 read scantime
 [ -z $scantime ] && scantime=30
 scan
-ips=`sudo tshark -r /tmp/scanOutput.pcap 2>/dev/null| grep ARP | grep $broadcast | awk '{print $12}'`
+ips=`sudo tshark -r /tmp/scanOutput.pcap -i $1 2>/dev/null| grep ARP | grep $broadcast | awk '{print $12}'`
 if [[ $ips == *"."* ]] 
 then
 echo -e "Suspected Device:\n"
