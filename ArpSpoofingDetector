@@ -1,5 +1,6 @@
 #!/bin/bash
-clear
+function header() {
+    clear
 echo -e "$(tput setaf 2)
   ___  _       _____   ____  _           
  / _ \| |_ ___|___ /  |  _ \| |__   ___  
@@ -7,12 +8,7 @@ echo -e "$(tput setaf 2)
  \__, | ||  __/___) | |  _ <| |_) | (_) |
    /_/ \__\___|____/  |_| \_\_.__/ \___/ 
                                          $(tput sgr 0)\n\n\n"
-[ $# -ne 1 ] && echo -e "USAGE: `basename $0` [Interface Name]\n" && exit 1
-[ `whoami` != "root" ] && echo -e "$(tput setaf 1)! Run script again as root: sudo bash `basename $0` [Interface Name]$(tput sgr 0)\n" && exit 1
-
-
-broadcast=`ifconfig $1 | grep -w inet | awk '{print $6}'`
-
+}
 function reqcheck() {
     echo "Checking requirements:"
 if [[ `tshark -v 2>/dev/null` == *"Wireshark"* ]]
@@ -48,19 +44,27 @@ firstip=$i
 fi
 done <<< "$ips"
 }
-
+header
+[ $# -ne 1 ] && echo -e "USAGE: `basename $0` [Interface Name]\n" && exit 1
+[ `whoami` != "root" ] && echo -e "$(tput setaf 1)! Run script again as root: sudo bash `basename $0` [Interface Name]$(tput sgr 0)\n" && exit 1
+broadcast=`ifconfig $1 | grep -w inet | awk '{print $6}'`
 reqcheck
+
+while true; do
 echo -en "Enter scan timout (default 30s): "
 read scantime
 [ -z $scantime ] && scantime=30
-
 scan
 ips=`sudo tshark -r /tmp/scanOutput.pcap 2>/dev/null| grep ARP | grep $broadcast | awk '{print $12}'`
 if [[ $ips == *"."* ]] 
 then
-printf "Suspected Device:\n"
+echo -e "Suspected Device:\n"
 getips
+exit 0
 else
-printf "No device detected\n"
+echo -en "No device detected\nTry again ? (y/n): "
+read answer
+[[ $answer == *"n"* || $answer == *"N"* ]] && echo -e "$(tput setaf 2)-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !$(tput sgr 0)" && sudo rm -f /tmp/scanOutput.pcap && exit 0
 fi
-
+header
+done
