@@ -50,8 +50,8 @@ for ip in ${ips}; do if [[ $ip =~ [0-9]* ]]; then array["$ip"]=`echo "$ips"| gre
 for key in "${!array[@]}";do if [ ${array["$key"]} -gt 50 ];then found="$ipbeg.$key";fi;done
 if [[ $found =~ "." ]]; then
 echo -en "IP Found, Looking for MAC address  "
-ping -c 2 "$found" > /dev/null
-arp -a | grep "$found" | awk '{print $4}' > /var/mactemp &
+ping -c 5 "$found" > /dev/null
+arp -an | grep "$found" | awk '{print $4}' > /var/mactemp &
 while true
 do
 [[ `cat /var/mactemp` =~ [a-fA-F0-9:]{17}|[a-fA-F0-9]{12} ]] && mac=`sudo cat /var/mactemp` && break
