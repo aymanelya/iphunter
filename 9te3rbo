@@ -54,7 +54,7 @@ ping -c 5 "$found" > /dev/null
 arp -an | grep "$found" | awk '{print $4}' > /var/mactemp &
 while true
 do
-found2=`cat /vat/mactemp | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`
+found2=`cat /var/mactemp | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`
 [ -n found2 ] && break
 for X in '-' '\' '|' '/'
 do
