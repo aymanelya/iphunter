@@ -69,35 +69,3 @@ read answer
 fi
 header
 done
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#while true
-#do
-#fi; done
-
-#echo -en "No device detected\nTry again ? (y/n): "
-#read reply
-#[[ $reply == *"n"* || $reply == *"N"* ]] && echo -e "$(tput setaf 2)-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !$(tput sgr 0)" && sudo rm -f /tmp/scanOutput.pcap && exit 1
-#sleep 100
-#fi
-#header
-#done
-
-
