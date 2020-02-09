@@ -52,18 +52,20 @@ if [[ $found =~ "." ]]; then
 echo -en "IP Found, Looking for MAC address  "
 ping -c 5 "$found" > /dev/null
 arp -an | grep "$found" | awk '{print $4}' > /var/mactemp &
+timeout=0
 while true
 do
 found2=`cat /var/mactemp | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`
-[ -n $found2 ] && break
+[[ $found2 =~ ":" ]] && echo -en "\r\033[KSuspected Device:\n [\033[93m!\033[0m] \033[91m$found\t\033[94m$found2\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+#timout 30s
+[[ ${timeout:0:2} == "30" ]] && echo -en "\r\033[KSuspected Device:\n [\033[93m!\033[0m] \033[91m$found\t\033[94mMac Address not found\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
 for X in '-' '\' '|' '/'
 do
 echo -en "\b$X"
 sleep 0.1
+timeout=`echo "$timeout+0.1" | bc`
 done
 done
-
-echo -en "\r\033[KSuspected Device:\n [\033[93m!\033[0m] \033[91m$found\t\033[94m$found2\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m"  && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
 else echo -e "No device detected\nTry again ? (y/n): "
 read answer
 [[ $answer == *"n"* || $answer == *"N"* ]] && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
