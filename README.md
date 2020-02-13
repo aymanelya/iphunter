@@ -7,7 +7,7 @@ You can download iphunter by cloning the [Git Repo](https://github.com/aymanelya
 
 ~ ❯❯❯ cd iphunter/
 
-~/9te3rbo ❯❯❯ sudo bash iphunter
+~/iphunter ❯❯❯ sudo bash iphunter
 ```
 <br/>
 
