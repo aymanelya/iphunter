@@ -35,8 +35,7 @@ fi
 }
 
 function Scan () {
-    sudo tshark -i ${1} -w /var/scanOutput.pcap > /dev/null 2>&1 &
-    pid=`pgrep tshark`
+    sudo tshark -i ${1} -w /var/scanOutput.pcap -a duration:$scantime > /dev/null 2>&1 &
     for (( i=1; i<=$scantime; i++ ))
     do
     calc=$((i*100/$scantime))
@@ -44,8 +43,6 @@ function Scan () {
    sleep 1
 done
 echo -ne 'Done scanning  \n'
-
-sudo kill -9 "$pid" > /dev/null 2>&1
 }
 
 ipnetcut=""
