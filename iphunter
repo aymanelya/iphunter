@@ -114,9 +114,9 @@ function Run () {
     while true
     do
     found2=`cat /var/mactemp | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`
-    [[ $found2 =~ ":" ]] && echo -en "\r\033[KSuspected Device (Using \033[1;32m$tool\033[0m or a similar tool):\n [\033[93m!\033[0m] \033[91m$found\t\033[94m$found2\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" #&& sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    [[ $found2 =~ ":" ]] && echo -en "\r\033[KSuspected Device (Using \033[1;32m$tool\033[0m or a similar tool):\n [\033[93m!\033[0m] \033[91m$found\t\033[94m$found2\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
     timout 30s
-    [[ ${timeout:0:1} == "3" ]] && echo -en "\r\033[KSuspected Device (Using \033[1;32m$tool\033[0m or a similar tool):\n [\033[93m!\033[0m] \033[91m$found\t\033[94mMac Address not found\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" #&& sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    [[ ${timeout:0:1} == "3" ]] && echo -en "\r\033[KSuspected Device (Using \033[1;32m$tool\033[0m or a similar tool):\n [\033[93m!\033[0m] \033[91m$found\t\033[94mMac Address not found\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
     for X in '-' '\' '|' '/'
     do
     echo -en "\b$X"
@@ -127,7 +127,7 @@ function Run () {
     fi
     else echo -e "No device detected\nTry again ? (y/n): "
     read answer
-    [[ $answer == *"n"* || $answer == *"N"* ]] && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && exit 0 #&& sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    [[ $answer == *"n"* || $answer == *"N"* ]] && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
     fi
 }
 
