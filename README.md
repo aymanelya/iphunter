@@ -1,21 +1,21 @@
 # Installation
 
-You can download 9te3rbo by cloning the [Git Repo](https://github.com/aymanelya/9te3rbo) and simply installing its requirements:
+You can download iphunter by cloning the [Git Repo](https://github.com/aymanelya/iphunter) and simply installing its requirements:
 
 ```
-~ ❯❯❯ git clone https://github.com/aymanelya/9te3rbo.git
+~ ❯❯❯ git clone https://github.com/aymanelya/iphunter.git
 
-~ ❯❯❯ cd 9te3rbo/
+~ ❯❯❯ cd iphunter/
 
-~/9te3rbo ❯❯❯ sudo bash 9te3rbo
+~/9te3rbo ❯❯❯ sudo bash iphunter
 ```
 <br/>
 
 # Usage
 
 ```
-Usage: sudo bash 9te3rbo [interface]
+Usage: sudo bash iphunter [interface]
 
 Example
-  sudo bash 9te3rbo eth0
+  sudo bash iphunter eth0
 ```
