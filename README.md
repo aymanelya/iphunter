@@ -1,4 +1,4 @@
-![iphunter Logo](http://nikolaskama.me/content/images/2017/02/kickthemout_small.png)
+![iphunter Logo](https://i.imgur.com/rOQqmHT.png)
 
 # Ip Hunter
 
