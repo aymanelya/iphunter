@@ -1,0 +1,132 @@
+#!/bin/bash
+function Header() {
+    clear
+echo -e "$(tput setaf 2)
+ ___         _   _             _            
+|_ _|_ __   | | | |_   _ _ __ | |_ ___ _ __ 
+ | || '_ \  | |_| | | | | '_ \| __/ _ \ '__|
+ | || |_) | |  _  | |_| | | | | ||  __/ |   
+|___| .__/  |_| |_|\__,_|_| |_|\__\___|_|   
+    |_|                                     
+                                         $(tput sgr 0)\n\n\n"
+}
+function ReqCheck() {
+    #check nmap
+    reqmet=""
+    echo "Checking requirements:"
+if [[ `tshark -v 2>/dev/null` == *"Wireshark"* ]]
+then
+    echo -e "\n\033[1;32mPASS:\033[0m tshark (wireshark-cli)"
+    if [[ `nmap -V 2>/dev/null` == *"Nmap version"* ]]
+    then
+        echo -e "\033[1;32mPASS:\033[0m nmap (nmap)\n"
+    else
+        echo -e "\033[91mFAIL:\033[0m Please install nmap (package name: nmap) on LINUX or (brew install nmap) on a MAC\n" && exit 1
+    fi
+else
+    echo -e "\n\033[91mFAIL:\033[0m Please install tshark (wireshark-cli) on LINUX or (brew install wireshark) on a MAC\n" && exit 1
+fi
+}
+
+function Scan () {
+    sudo tshark -i ${1} -w /var/scanOutput.pcap > /dev/null 2>&1 &
+    PID=$!
+    for (( i=1; i<=$scantime; i++ ))
+    do
+    calc=$((i*100/$scantime))
+   echo -ne "Loading ${calc}%\r"
+   sleep 1
+done
+echo -ne 'Done scanning  \n'
+killall tshark -9 2> /dev/null
+}
+
+ipnetcut=""
+ipkickthemout=""
+fakemac=""
+found2=""
+
+function NetCut () {
+    # $1 is the ip list <---> $2 is the gateway
+    ipbeg=`echo "$2" |cut -d '.' -f 1,2`
+    test=`sudo echo "$1" | awk -v ip="$ipbeg" '$1 !~ ip { print $2 }'`
+    [[ $test =~ "." ]] && ipnetcut=$test
+
+}
+function KickThemOut () {
+    # $1 is the gateway <---> $2 is the wireless interface
+    ipbeg=`echo "$1" |cut -d '.' -f 1,2`
+    ipscan=`sudo nmap -iflist | grep "$2" | awk -v ip="$ipbeg" '$1 ~ ip { print $1}' | awk -F "." '$4 ~ /^0/ {print $0}'` 
+        ips=`sudo nmap -T5 -sP "$ipscan" -e "$2" | grep "for" | awk '$5 !~ /\.1$/ && $5 ~ /^[0-9]/ {print $5}'`
+    fakemac=`arp -an | grep "$1)" | awk '{print $4}'`
+    while IFS= read -r ip
+    do
+    ipmac=`arp -an | grep "$ip" | awk '{print $4}'`
+    if [[ $ipmac == $fakemac ]]
+    then
+    ipkickthemout=$ip
+    found2=$ipmac
+    break
+    fi
+    done <<< "$ips"
+   
+}
+Header
+[ $# -ne 1 ] && echo -e "USAGE: `basename $0` [Interface Name]\n" && exit 1
+[ `whoami` != "root" ] && echo -e "\033[91m! Run script again as root: sudo bash `basename $0` [Interface Name]\033[0m\n" && exit 1
+ReqCheck
+
+function Run () {
+    int=$1
+    if [ -z $scantime ]
+    then
+    echo -en "Enter scan timout (default 30s): "
+    read scantime
+    [ -z $scantime ] && scantime=30
+    Scan $1
+    else
+    let "scantime=$scantime*2"
+    echo -e "Scan timout is now doubled to ${scantime}s"
+    Scan $1
+    fi
+    gateway=`netstat -nr | grep default | awk '{print $2}'`
+    broadcast=`ifconfig $1 | grep broadcast | awk '{print $6}'`
+    ips=`sudo tshark -o 'gui.column.format:"Dest","%d","Protocol","%p","Info","%i"' -r /var/scanOutput.pcap 2> /dev/null | grep ARP |grep Broadcast |grep Tell | awk '{print substr($5, 1, length($5)-1),$7}' | awk -v gt="$gateway" '$2 !~ gt {print $0}' | sort -k 2 | uniq`
+    ipbeg=`echo "$gateway" |cut -d '.' -f 1,2,3`
+    ips2=`tshark -r /var/scanOutput.pcap | awk -v ipbeg="$ipbeg" '$3 ~ ipbeg {print $3}' | sort -u | grep -v "$gateway"`
+    IFS=\n
+    NetCut $ips $gateway; [[ $ipnetcut == "" ]] && KickThemOut "$gateway" "$int"
+    unset IFS
+    if [[ $ipnetcut =~ "." ]];then found=$ipnetcut;tool="NetCut";elif [[ $ipkickthemout =~ "." ]];then found=$ipkickthemout;tool="KickThemOut";else found="";fi
+    if [[ $found =~ "." ]]; then
+    if [[ $found2 =~ ":" ]];then echo -en "\r\033[KSuspected Device: (Using \033[1;32m$tool\033[0m or a similar tool)\n [\033[93m!\033[0m] \033[91m$found\t\033[94m$found2\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    else
+    echo -en "IP Found, Looking for MAC address... "
+    ping -c 2 "$found" > /dev/null
+    arp -an | grep "$found" | awk '{print $4}' > /var/mactemp &
+    timeout=0
+    while true
+    do
+    found2=`cat /var/mactemp | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`
+    [[ $found2 =~ ":" ]] && echo -en "\r\033[KSuspected Device (Using \033[1;32m$tool\033[0m or a similar tool):\n [\033[93m!\033[0m] \033[91m$found\t\033[94m$found2\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" #&& sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    timout 30s
+    [[ ${timeout:0:1} == "3" ]] && echo -en "\r\033[KSuspected Device (Using \033[1;32m$tool\033[0m or a similar tool):\n [\033[93m!\033[0m] \033[91m$found\t\033[94mMac Address not found\033[0m\n" && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" #&& sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    for X in '-' '\' '|' '/'
+    do
+    echo -en "\b$X"
+    sleep 0.1
+    timeout=`echo "$timeout+0.1" | bc`
+    done
+    done
+    fi
+    else echo -e "No device detected\nTry again ? (y/n): "
+    read answer
+    [[ $answer == *"n"* || $answer == *"N"* ]] && echo -e "\n\n\033[1;32m-Deleting temporary file\n-Exiting\n-Created by: Ayman Elya !\033[0m" && exit 0 #&& sudo rm -f /var/scanOutput.pcap /var/mactemp && exit 0
+    fi
+}
+
+while true
+do
+Run $1
+Header
+done
