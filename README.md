@@ -1,3 +1,12 @@
+![iphunter Logo](http://nikolaskama.me/content/images/2017/02/kickthemout_small.png)
+
+# Ip Hunter
+
+A tool to detect the device that's cutting internet on your network and causing issues.
+You can then block their MAC address using MAC filtering or block their IP address.
+
+Author: [Ayman Elyahmidi](mailto:aymanelyahmidi@gmail.com).
+-------------
 # Installation
 
 You can download iphunter by cloning the [Git Repo](https://github.com/aymanelya/iphunter) and simply installing its requirements:
