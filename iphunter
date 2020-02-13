@@ -30,7 +30,7 @@ then
         echo -e "\033[91mFAIL:\033[0m Please install tshark (wireshark-cli) on LINUX or (brew install wireshark) on a MAC\n" && exit 1
     fi
 else
-    echo -e "\033[91mFAIL:\033[0m Please install ip (package name: iproute2) on LINUX or (brew install iproute2mac) on a MAC\n" && exit 1
+    echo -e "\n\033[91mFAIL:\033[0m Please install ip (package name: iproute2) on LINUX or (brew install iproute2mac) on a MAC\n" && exit 1
 fi
 }
 
