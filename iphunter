@@ -89,7 +89,7 @@ function Run () {
     then
     echo -en "Enter scan timout (default 10s): "
     read scantime
-    [ -z $scantime ] && scantime=1
+    [ -z $scantime ] && scantime=10
     Scan $1
     else
     let "scantime=$scantime*2"
