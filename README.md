@@ -5,7 +5,7 @@
 A tool to detect the device that's cutting internet on your network and causing issues.
 You can then block their MAC address using MAC filtering or block their IP address.
 
-Author: [Ayman Elya](mailto:aymanelyahmidi@gmail.com).
+Author: [Ayman Elyahmidi](mailto:aymanelyahmidi@gmail.com).
 -------------
 # Installation
 
